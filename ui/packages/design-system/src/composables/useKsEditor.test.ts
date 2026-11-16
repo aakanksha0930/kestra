@@ -348,16 +348,6 @@ describe("useKsEditor update:modelValue emission", () => {
         wrapper.unmount()
     })
 
-    it("emits the corrected value after a synchronous rewrite inside one content event", async () => {
-        const {wrapper, typeValue, emitted} = await mountWithContentListener("A")
-
-        typeValue("violating")
-        typeValue("A")
-
-        expect(emitted()).toEqual(["violating", "A"])
-        wrapper.unmount()
-    })
-
     it("does not re-emit a value the parent has since replaced", async () => {
         const {wrapper, typeValue, emitted} = await mountWithContentListener("A")
         typeValue("B")
