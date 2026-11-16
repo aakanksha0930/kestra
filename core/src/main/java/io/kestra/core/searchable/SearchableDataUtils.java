@@ -3,8 +3,13 @@ package io.kestra.core.searchable;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.flows.Data;
 import io.kestra.core.models.flows.Type;
+import io.kestra.core.models.flows.input.ItemTypeInterface;
+import io.kestra.core.utils.TypeConverter;
 import org.slf4j.Logger;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +92,22 @@ public final class SearchableDataUtils {
             throw new IllegalArgumentException("The data '%s' cannot be searchable because its type %s is not supported.".formatted(data.getId(), data.getType()));
         }
 
-        return value.toString();
+        Type type = arrayItem && data instanceof ItemTypeInterface typed && typed.getItemType() != null ? typed.getItemType() : data.getType();
+        return switch (type) {
+            case DATETIME -> TypeConverter.toInstant(value).toString();
+            case DATE -> TypeConverter.toLocalDate(value).toString();
+            case TIME -> DateTimeFormatter.ISO_LOCAL_TIME.format(TypeConverter.toLocalTime(value));
+            case DURATION -> toDuration(value).toString();
+            default -> value.toString();
+        };
+    }
+
+    // A serialized output carries a duration as decimal seconds, an input as a Duration.
+    private static Duration toDuration(Object value) {
+        if (value instanceof Number number) {
+            BigDecimal seconds = new BigDecimal(number.toString());
+            return Duration.ofSeconds(seconds.longValue(), seconds.remainder(BigDecimal.ONE).movePointRight(9).longValue());
+        }
+        return TypeConverter.toDuration(value);
     }
 }
