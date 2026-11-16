@@ -1556,6 +1556,10 @@ export type KeyUsagesRequestKey = {
 export type KeyUsagesRequestKind = 'KV' | 'SECRET';
 
 export type KeyUsagesResponse = {
+    results?: Array<KeyUsagesResponseKeyUsage>;
+};
+
+export type KeyUsagesResponseKeyUsage = {
     namespace?: string | null;
     key?: string;
     flows?: number;
@@ -9398,7 +9402,7 @@ export type CountKeyUsagesResponses = {
     /**
      * countKeyUsages 200 response
      */
-    200: Array<KeyUsagesResponse>;
+    200: KeyUsagesResponse;
 };
 
 export type CountKeyUsagesResponse = CountKeyUsagesResponses[keyof CountKeyUsagesResponses];
